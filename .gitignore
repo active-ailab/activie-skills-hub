@@ -1,0 +1,24 @@
+# Local runtime state, downloaded tools and isolated dependencies
+.state/
+.venvs/
+.venv/
+venv/
+node_modules/
+
+# Generated distribution packages
+/dist/
+
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local logs and operating-system artifacts
+*.log
+.DS_Store
+Thumbs.db

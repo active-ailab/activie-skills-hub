@@ -1,0 +1,502 @@
+{
+  "Trace32_CLI": {
+    "purpose": "把死机现场里的地址、寄存器和调用栈对应到源码，辅助分析 Ramdump。",
+    "when": "拿到死机 dump、ELF 或 Trace32 导出的文本，需要查崩溃位置时。",
+    "inputs": "与故障版本一致的 ELF；调用栈或寄存器文本；远程分析另需 Trace32 会话和访问权限。",
+    "steps": [
+      "先确认 trace32-cli 已安装；只查语法可运行 trace32-cli --help。",
+      "将 ELF 和现场文件路径交给 Agent；单个地址选 resolve，调用栈文本选 annotate，寄存器选 regs。",
+      "需要综合报告时选 triage；远端现场按需选择 remote 系列流程。"
+    ],
+    "outputs": "地址对应的函数和源码位置、寄存器解释或初步崩溃报告。",
+    "example": "请使用 trace32-cli，结合 ELF [路径] 和调用栈 [路径]，定位异常位置并列出证据。",
+    "limits": "ELF 必须匹配版本；启动个人远程会话与只读查询是不同操作。",
+    "evidence": {
+      "README.md": "4c91a9818b9ca883e2f5585e5c4a71f45bb9f4c699e0edcbbe87d751ee4465c1",
+      "templates/copilot-skills/trace32-cli/SKILL.md": "3b7bec8db6080f44f7f8f2fd93358b2828d861c2a482b58383c90821951e8ee5"
+    }
+  },
+  "active-build-script": {
+    "purpose": "帮助 Agent 使用正式构建工具编译固件或 UI 资源，并选对编译范围。",
+    "when": "构建 Active/Zepp 固件、续编当前配置，或只生成 UI 资源时。",
+    "inputs": "目标工作区；项目和板型（或可复用配置）；需要 fw、ota、模拟器还是 UI 资源。",
+    "steps": [
+      "让 Agent 检查当前 build/.config 和上次构建记录，确认复用还是切换配置。",
+      "完整固件构建先展示 BuildPlan 与命令，按 Skill 要求确认后执行；续编使用当前配置语义。",
+      "只生成 UI 时选 active-ui，区分 gapp、csv 与 all；结束后核对退出码和实际产物。"
+    ],
+    "outputs": "固件或 UI 资源包，以及构建命令、结果和失败原因。",
+    "example": "请按 active-build Skill 检查工作区 [路径] 的当前配置，给出只续编主固件的计划，确认后再执行。",
+    "limits": "依赖已安装的 active-build / active-ui 等工具；构建不等于烧录。模拟器不支持烧录。",
+    "evidence": {
+      "README.md": "54bb24d177b8f80d26d1331118e405b1fa6b4bc39fb5a942563ac7ad49496940",
+      "skill/active-build/SKILL.md": "099a48bed4eb068c508e4259d1d4049af04892a504e329fce10b099e19e595f6",
+      "skill/active-ui/SKILL.md": "62a52ea1449335794dc7eefb206ed88d7cf00efa519b00db7de872052d3049e1"
+    }
+  },
+  "active-coding-rules": {
+    "purpose": "约束编码 Agent 的工作方式：先理解代码、控制改动范围、最后验证结果。",
+    "when": "让 Agent 写代码、修复问题、重构或审查代码时。",
+    "inputs": "代码仓库、具体需求或问题、必须保持的行为、验收方法。",
+    "steps": [
+      "在编码会话中要求 Agent 先读取此 Skill。",
+      "说明问题、目标和约束，让 Agent 先查看现有实现再修改。",
+      "完成后检查改动范围、验证结果和仍未验证的部分。"
+    ],
+    "outputs": "符合任务范围的代码改动或审查结论，并附验证依据。",
+    "example": "请遵循 active-coding-rules，修复 [问题]；先理解现有实现，仅修改必要部分，并用 [验收方式] 验证。",
+    "limits": "这是行为规范，不是独立程序，也不会自动提供语言或框架知识。",
+    "evidence": {
+      "README.md": "d8b713b3b12ed36e85fd14ff2d494982c5ffe77a3fafeb21e8f25a5385447b0d",
+      "active-coding-rules/SKILL.md": "1d2bf827c11f05cb9f054c87aef9cb192002aeba12ddc25f18cdac54930c51df"
+    }
+  },
+  "active-embedded-native-testing": {
+    "purpose": "为嵌入式 C/C++ 业务代码补可重复运行的测试，区分主机验证和真机验证。",
+    "when": "验证真实 API、边界、故障路径，或需要 ASan/UBSan、覆盖率和设备 UTEST 时。",
+    "inputs": "仓库路径、目标模块/API、编译配置；真机测试另需设备及项目测试框架。",
+    "steps": [
+      "列出要覆盖的 API、分支和只能在设备验证的行为。",
+      "优先编译真实源码并链接 mock；依赖太重时按 Skill 选择抽取函数或静态审计。",
+      "执行主机测试；有设备条件时补 UTEST，分别记录验证范围。"
+    ],
+    "outputs": "测试代码、运行结果、业务覆盖范围，以及未验证的目标机行为。",
+    "example": "请用 active-embedded-native-testing 为 [模块路径] 的 [API] 建立主机测试，覆盖边界和失败路径，注明真机验证缺口。",
+    "limits": "静态审计、模型测试与真实源码运行覆盖不能混为一谈。",
+    "evidence": {
+      "SKILL.md": "b0e021667e90a75eb0333bbbf7be843a04de59dfab0d122dc233e92737a5edee"
+    }
+  },
+  "active-gerrit-workflow": {
+    "purpose": "查询和分析 Gerrit 变更，整理待评审队列、风险及提交前检查。",
+    "when": "审查 patch set、评估发版分支或协调多条相关变更时。",
+    "inputs": "Gerrit 实例访问权限、变更编号或查询范围；本地审查另需代码工作区。",
+    "steps": [
+      "指定任务是查单条变更，还是做队列、发版或多变更审计。",
+      "Agent 用 active-gerrit 获取真实 diff、评论和状态，业务编排层据此应用评审规则。",
+      "先阅读带证据的结论；需要投票、评论或提交时再明确操作目标。"
+    ],
+    "outputs": "变更摘要、风险清单、评审简报或提交前检查结果。",
+    "example": "请使用 active-gerrit-workflow 审查变更 [编号]，读取最新 patch set 和评论，输出风险及源码证据。",
+    "limits": "基础层 active-gerrit 负责原子操作；本项目也能写评论、投票和提交，查报告不代表要求这些写入。",
+    "evidence": {
+      "README.md": "facbf20eb2016c014a505bbe94a143185ff1882b68f2429c96e32ba4c79361b9",
+      "active-gerrit-workflow/SKILL.md": "ff5f9642069b2b269c45422901dfa1e6ec7328f34e2a7b9b1094d5b68296131a",
+      "active-gerrit/SKILL.md": "204bed1240126701d9e0cec4af03fcd366d426afe6dbbb4972fc9720d9d983e0",
+      "tests/install/fixtures/README.md": "fdc70577d9fd77021d6ae36bec29c4b2616ea957a052cddf7a2d7914024a3341"
+    }
+  },
+  "active-jira-project-status-preview": {
+    "purpose": "把 Jira 项目问题整理成管理者能看的健康度报告，可结合 OpenClaw 定时发送飞书。",
+    "when": "想了解项目积压、状态分布，或生成周期项目报告时。",
+    "inputs": "项目代号、Jira CLI 登录；定时发送另需 OpenClaw 和飞书目标群。",
+    "steps": [
+      "先指定项目和报告范围，让 Agent 核对 Jira 访问及配置。",
+      "读取完整分页数据，生成报告文件并检查摘要。",
+      "需要周期发送时，再明确时间、时区和目标群，由 OpenClaw 创建调度。"
+    ],
+    "outputs": "HTML 仪表盘、Markdown 摘要和 JSON 快照；按要求可发送飞书。",
+    "example": "请为 Jira 项目 [KEY] 生成一次状态预览，输出本地报告和摘要，先不要创建定时任务。",
+    "limits": "生成一次报告与定时发送是两件事；报告质量依赖查询范围及真实权限。",
+    "evidence": {
+      "README.md": "74ba1c77c2acdc23df1b33f72b69d0a9f87116718baf742a08c60263571f3522",
+      "SKILL.md": "6634b5829d27f7e48d6a8b76223b3cafdf830bf62b7b0a89ab6b112d85a88ee2"
+    }
+  },
+  "active-jira-workflow": {
+    "purpose": "通过 Agent 查询和处理 Jira，并把团队报告、飞书操作和定时提醒串起来。",
+    "when": "查问题、整理周报、按项目规则起草任务，或设计 Jira 定时检查时。",
+    "inputs": "项目代号/JQL/问题编号；jira CLI 登录；飞书操作另需 lark-cli 授权。",
+    "steps": [
+      "告诉 Agent 具体目标，由它选择 active-jira、active-jira-report、active-jira-automation 或 active-lark。",
+      "查询/报告任务先核对筛选和项目规则；建单任务补齐必填字段。",
+      "核对结果；定时提醒需额外给出周期和通知目标。"
+    ],
+    "outputs": "问题列表、项目报告、任务草稿或实际操作结果，取决于你指定的任务。",
+    "example": "请用 active-jira-report 查询 [KEY] 超过一周未处理的问题，按负责人汇总，列出问题链接。",
+    "limits": "多种 Skill 合并在同一仓库；飞书和定时任务需要各自环境，不能只安装 Jira CLI。",
+    "evidence": {
+      "README.md": "134a494938585af19c6b64fec169ee6a440ef4d627abf14046a6e55d0db1b07b",
+      "active-jira-automation/SKILL.md": "c8c89af0bde8530bb2cd20e825fbd118909be53792a6ffda3fa9501559471538",
+      "active-jira-report/SKILL.md": "19d1b46a63cd6f9da68974d9ab095e602e622a59fe13ef2f0ed10bd0f62a1409",
+      "active-jira/SKILL.md": "9219bb7316581cb6f367b1da32d6ca01aeee1519454b32c83db829c486c941be",
+      "active-lark/SKILL.md": "ec3d08ca0b3dcab3f432698ddffcd62257b73d2df0bca14c6349cc80e807da2a",
+      "active-jira-automation/scripts/renderers/README.md": "917b8fed9fade21bfd7832716d2874eff65f7e7b99acc6d2f0f32193e2c69708",
+      "active-jira-automation/scripts/scenarios/README.md": "e1d22e631f232248956a9926b57cbc19738bc1bb12c88529f5604afbd05b6829",
+      "active-jira-automation/scripts/templates/README.md": "56194f6dc0cd56b6663db6d77d6ff4d2ec0b8683264824602d834693e910b631"
+    }
+  },
+  "active-knowledge-suite": {
+    "purpose": "为大型工程建立本地知识索引，让 Agent 查符号、调用链、配置影响和文档证据。",
+    "when": "理解 RTOS 大工程，或需要反复查询源码与团队文档时。",
+    "inputs": "Python 3.11+、目标源码工作区、知识文档目录；Agent 的 MCP 配置。",
+    "steps": [
+      "安装 active-knowledge-server；用 active-kb init 绑定实际工程与文档目录。",
+      "依次校验配置、查看状态并执行增量索引。",
+      "用 active-kb serve --transport stdio 接入 Agent，再询问符号或配置问题。"
+    ],
+    "outputs": "本地知识库索引，以及带来源的代码上下文、调用链和证据包。",
+    "example": "请基于已配置的 Active Knowledge MCP，追踪 [函数] 的调用链并给出相关配置和来源。",
+    "limits": "这是需要安装和建索引的知识服务；未建立索引时不能直接得到工程查询结果。",
+    "evidence": {
+      "README.md": "0f6591f087a95d9c1b71dbc2dce5ce70450bb847e897cb628d90458bcb7b9c02",
+      "active-knowledge-server/README.md": "b3e7b28f613549dbc8d80b328721e0e2c20ec59d17650e1663a0dae43dd30f5c",
+      "knowledge-sources/README.md": "6b00da626bbf7b95f90306f9fb950ecc6d6d93ab823eaac8dd8b28de64bd0eb4"
+    }
+  },
+  "active-project-pl-skills": {
+    "purpose": "把 PL 常用的新项目初始化、Gerrit 风险审查、ASAN 构建和死机分析组织为工作流。",
+    "when": "PL 需要跨代码、Jira 附件和故障现场整理问题报告时。",
+    "inputs": "项目配置、源码路径；按任务补充 Gerrit 变更、Jira 编号、ELF/dump/日志。",
+    "steps": [
+      "明确本轮做初始化、review、构建还是死机分析。",
+      "让 Agent 检查对应配置和脚本，再按所选流程收集实际数据。",
+      "检查报告中的证据、关键命令及待补材料；需要飞书同步时指定目标。"
+    ],
+    "outputs": "项目初始化结果、风险审查或崩溃分析报告，按任务提供。",
+    "example": "请用 active-project-pl-skills 分析 Jira [编号] 的死机附件，结合 ELF [路径] 和源码 [路径] 输出证据与待验证项。",
+    "limits": "不同流程依赖不同工具及内网权限；仅有 Jira 标题不足以完成死机定位。",
+    "evidence": {
+      "README.md": "c1e25ae9d3aab08e2d3acaae1e7d65ace4b401e40fe23772957d3168eb32c148",
+      "SKILL.md": "f22ef24bcc83496ade4673600ef4f72cb456a2e380d0cf2d4a0f6ddfc377b851"
+    }
+  },
+  "active-project-release-manager": {
+    "purpose": "围绕 OTA 版本计划发送打包、提测、自测通知，并检查 FO 自测进度。",
+    "when": "PL 跟进各轮提测时间、通知对象和自测完成情况时。",
+    "inputs": "项目配置、飞书应用权限、计划文档、群 ID、FO 名单及 OTA 阶段。",
+    "steps": [
+      "按项目配置模板填写项目、群和计划文档，先 read-plan 验证解析。",
+      "选择本轮通知或自测进度检查，核对轮次、日期与接收群。",
+      "需要自动通知时，按每轮排期建立对应调度；检查通知和进度结果。"
+    ],
+    "outputs": "飞书交互卡片、提测进度与 All Done 等通知结果。",
+    "example": "请用 active-project-release-manager 读取 [项目] 的版本计划，列出下一轮排期与 FO 名单，先不发送通知。",
+    "limits": "通知命令默认可能发送正式项目群；运行前需明确本轮要发送的通知和对象。",
+    "evidence": {
+      "README.md": "3a5ff40435a01fb1c084e2dea1d11a879aa9a50a1754e057efcb982df7e54091",
+      "SKILL.md": "8d886ab5e711d6e8be691d9fcb57b458a8789f5d41ef286ed81f6bff07720174"
+    }
+  },
+  "active-release-diff-tracker": {
+    "purpose": "比较两份 Repo manifest 对应版本的提交，找出还没回到目标分支的改动。",
+    "when": "发版前审计回主干进度，避免只看 SHA 漏掉 cherry-pick 或 rebase 后的同一改动时。",
+    "inputs": "两份 manifest XML；同步且相关项目可构建的主干工作区；Gerrit SSH 和 Jira 访问。",
+    "steps": [
+      "确认源/目标 manifest、筛选全部还是仅 feat/ref、以及报告格式。",
+      "先检查本地源码和服务访问，再按 Change-Id 追踪差异。",
+      "查看未回合条目和证据；需要飞书看板或 owner 提醒时另行指定。"
+    ],
+    "outputs": "未回合提交 CSV、中文 Markdown 分析；按要求可输出飞书表格和看板。",
+    "example": "请比较 [release.xml] 与 [master.xml]，审计全部类型的未回合提交，先检查前提并输出本地报告。",
+    "limits": "不能仅按提交 SHA 判断是否回合；缺主干源码或访问条件时应报告缺口。",
+    "evidence": {
+      "README.md": "b2bedb2b3aed71a3074432001a63e17034229ca6e2193be0bd6e4fef7351e0cf",
+      "SKILL.md": "28233908200384bc5e5949b97803b971168df468b54c913bf709e2bceac8b7f2"
+    }
+  },
+  "active-sport-debug": {
+    "purpose": "沿传感器到算法、固件记录再到 App/云端，追查运动指标为什么不一致。",
+    "when": "距离、配速、心率、LAP、REP 等两端数字或时序对不上时。",
+    "inputs": "异常指标、复现时间与预期；固件和 App 日志、记录数据、源码；可附 Jira/Gerrit。",
+    "steps": [
+      "先说明在哪两端、哪个时间段出现什么差异。",
+      "Agent 对齐数据新鲜度和时间，追踪每层生产、转换和消费过程。",
+      "区分事实、推断和缺失证据，提出根因及验证步骤。"
+    ],
+    "outputs": "带链路、时间和证据的运动数据根因报告。",
+    "example": "请用 active-sport-data-e2e-analysis 分析 [记录] 中手表和 App 的距离差异，结合 [日志路径] 追到生产消费链路。",
+    "limits": "适合业务数据链路，不替代普通崩溃分析或单纯构建流程。",
+    "evidence": {
+      "active-sport-data-e2e-analysis/SKILL.md": "b1593ca916b5d88fc87d6a2c428335f9de818a2ff1895b343d91a43d986a93b8"
+    }
+  },
+  "active_skills_install": {
+    "purpose": "把工作区中的 Skill 链接到 Agent 的用户技能目录，方便统一安装和维护。",
+    "when": "已经同步技能源码，需要让 Codex/Agents 发现它们时。",
+    "inputs": "包含技能仓库与 active_skills_install 的工作区；Shell 和软链接支持。",
+    "steps": [
+      "在工作区根目录用 sh active_skills_install/active_skills_install.sh list 查看可安装名称。",
+      "传入 Skill 名称安装单项；需要全部时选择 all。",
+      "用 status 查看两个安装目录的链接状态；卸载用 uninstall。"
+    ],
+    "outputs": "指向原始源码的用户级 Skill 软链接及安装状态。",
+    "example": "请列出工作区 [路径] 的可安装 Skill，只安装 [名称]，然后检查 Codex 和 Agents 的链接。",
+    "limits": "源码移动后链接会失效；这个工具负责安装，不负责执行业务任务。",
+    "evidence": {
+      "README.md": "5a757d8e782076da553660c3cc73b0b3d2173c710be8d79be1a3aa39f73dfd67"
+    }
+  },
+  "build_ui_easy": {
+    "purpose": "在 64Mcode/madrid 类固件工程中单独编译 UI 和语言资源，减少完整固件构建。",
+    "when": "只改 GAPP、翻译或样式，需要快速生成资源验证时。",
+    "inputs": "对应固件源码工作区、构建环境与已安装的 build-ui 工具。",
+    "steps": [
+      "说明要生成 Application.bin、locale.zip 还是单个 bstyle。",
+      "让 Agent 按 build-ui-64mcode Skill 核对工程和资源选项并执行。",
+      "核对本轮生成文件；再按设备流程手动拷贝验证。"
+    ],
+    "outputs": "Application.bin、Application.crc、locale.zip 或指定样式产物。",
+    "example": "请按 build-ui-64mcode，在 [工作区] 只编译 UI 和语言资源，列出生成文件，先不要推送设备。",
+    "limits": "适用特定工程布局；生成资源不等于已部署到设备。",
+    "evidence": {
+      "README.md": "531b3a5ff8d44ce0d1be3cdb3240d7be11a45e078e00221c198bd6210187d3ab",
+      "SKILL.md": "d095edb0a75985d2cb6ed4773cb2d78aedc0656b409ff2c4d6e874ea2e431a84"
+    }
+  },
+  "code-review": {
+    "purpose": "当前是用于存放代码审查 Skill 和提示词的占位仓库。",
+    "when": "了解仓库现状，或准备补充审查规则时。",
+    "inputs": "若要开展实际审查，需要另行提供可用 Skill/规则和代码变更。",
+    "steps": [
+      "先在项目文件中核对当前仓库是否已有实际 Skill 或审查实现。",
+      "当前资料只说明定位，不提供可验证的审查执行步骤。",
+      "可改用现有的 Gerrit 工作流，或先补充本仓库内容。"
+    ],
+    "outputs": "当前不能承诺产出自动化审查结果。",
+    "example": "请先检查 code-review 仓库是否已有可用规则和入口；如果没有，列出缺失内容，不要声称已完成审查。",
+    "limits": "仓库定位不等于已实现能力。",
+    "evidence": {
+      "README.md": "6740f8bdb058dec14934a8338c06ccff5e6ef700a1a169455d05162a38ae422b"
+    }
+  },
+  "commit-message-standards": {
+    "purpose": "把 Git 提交说明整理成团队要求的中文格式，并检查类型、编号和正文结构。",
+    "when": "提交前生成说明，或检查/修复已有 commit message 时。",
+    "inputs": "实际代码 diff、变更目的、Issue 编号和已有提交说明（如有）。",
+    "steps": [
+      "把变更内容与问题编号交给 Agent，并要求使用此 Skill。",
+      "先判断提交类型，再核对标题和 Issue 要求。",
+      "fix 类型按规则补齐四段正文，检查说明与实际 diff 一致。"
+    ],
+    "outputs": "符合团队格式的提交说明，或具体不合规项。",
+    "example": "请用 commit-message-standards，根据当前 diff 为 [ISSUE] 起草中文 fix 提交说明，先不要提交。",
+    "limits": "fix/feat 有 Issue 要求；规范化文案不会自动验证业务代码正确。",
+    "evidence": {
+      "README.md": "36bfdbd1c5732134739c0b608401c0a918f18d16895142dc8e79814acbb18493",
+      "SKILL.md": "c6e89ff641953bf87749cfe9407a4060d33df022860e82b2aa46f0c3ac5a82e2"
+    }
+  },
+  "device-skills": {
+    "purpose": "统一控制 Watch-Link 设备连接、串口命令、挂盘、文件传输、烧录和诊断。",
+    "when": "手表连接异常、取日志、推送文件、复位或刷机时。",
+    "inputs": "设备连接信息、目标设备和操作目的；文件操作需路径，烧录需匹配固件。",
+    "steps": [
+      "使用 watchlink-v3，先检测端口和设备健康状态。",
+      "根据目标选择串口、文件、VBUS 或烧录流程，核对设备和文件路径。",
+      "检查设备状态和本次命令结果，保留失败证据。"
+    ],
+    "outputs": "设备诊断结果、拉取的文件或已完成的设备操作。",
+    "example": "请用 watchlink-v3 检查连接设备的健康状态，并列出日志读取方案，先不复位或烧录。",
+    "limits": "部分操作会修改设备、删除文件或烧录；应明确指定操作对象和范围。",
+    "evidence": {
+      "README.md": "f71185703c9ec6280f4d354c99c1af3752095215aaff905b4cb30070e543a080",
+      "watchlink-v3/README.md": "a0b77f2da3efad02657eeb1415788f64d5fa6cea5c6c08a3c540d57966d2d031",
+      "watchlink-v3/SKILL.md": "5ae0e9eec181b1c2a218a8c28aceb90ce8627542719d4646a2e856f3cda40219"
+    }
+  },
+  "elf_fetch": {
+    "purpose": "从 Zepp CI 获取指定固件版本的调试产物，供固定版本问题分析。",
+    "when": "缺少故障版本 ELF、map 或相关配置文件时。",
+    "inputs": "准确产品/项目和固定版本、CI 访问条件及产物保存位置。",
+    "steps": [
+      "告诉 Agent 要获取的精确版本和项目，不用“最新版”代替故障版本。",
+      "按 elf-fetch Skill 检查 CLI/CI 配置，下载并提取所需产物。",
+      "核对产物版本和保存路径，再交给崩溃分析工具使用。"
+    ],
+    "outputs": "指定版本的 ELF、map、XML、config 等实际可提取文件。",
+    "example": "请用 elf-fetch 下载 [产品] 的 [固定版本] 调试产物，提取 ELF/map，并列出版本依据和保存路径。",
+    "limits": "CI 权限、网络或历史产物保留情况会影响下载；本工具本身不完成崩溃分析。",
+    "evidence": {
+      "README.md": "b3d41b8bf05c916d7fef275f685bf1903392109e1159c05d6da46c38d7d74651",
+      "SKILL.md": "af26b58c676580490ce9791bcdc7337a210d5ece99b30128b6673bb75d4b09e0",
+      "vscode-auth-helper/README.md": "a84947898f5ebab484f60369a5961e3b76ed7228b04dbdc951549708367d5ab0",
+      ".codex/skills/elf-fetch/SKILL.md": "d225a9f8a660f698eec3a422faeacbb38468a11bf7375be66038721a754f55b4"
+    }
+  },
+  "firmware-doc-reviewer": {
+    "purpose": "按 PRD 或固件 PFS 的类型和视角检查需求文档，指出可追溯的问题。",
+    "when": "评审需求完整性、可实现性或固件设计说明时。",
+    "inputs": "文档内容或可访问链接、文档类型、希望采用的评审视角。",
+    "steps": [
+      "提供文档，说明是 PRD 还是 PFS，以及重点。",
+      "Agent 加载匹配的 rules，逐项检查并定位原文依据。",
+      "阅读结构化发现、风险和可执行的修改建议。"
+    ],
+    "outputs": "带原文证据和改进建议的文档评审结论。",
+    "example": "请用 firmware-doc-reviewer 从固件实现视角评审 [PRD/PFS 路径]，列出缺失条件、风险和原文位置。",
+    "limits": "这是文档评审，不是对代码实现已经符合需求的证明。",
+    "evidence": {
+      "README.md": "f62af2f1bfed9587a8d7f567cdcb33cee99f3abf998136c4f78067a2fd6817db",
+      "SKILL.md": "de4907a42585b806c597426527c3451068197478ff685e86f665b25e534e08c1"
+    }
+  },
+  "lark_mcp_auth_skills": {
+    "purpose": "辅助完成飞书 MCP 重新授权，并核对新失效日期是否生效。",
+    "when": "飞书 MCP 授权到期，需要重新授权时。",
+    "inputs": "自己的 open.feishu.cn/page/mcp 链接、本机浏览器登录状态与授权权限。",
+    "steps": [
+      "按安装说明准备 Python 环境及 Playwright Chromium。",
+      "让 Agent 打开指定 MCP 页面并完成重新授权流程。",
+      "核对临时成功提示和刷新后的失效日期。"
+    ],
+    "outputs": "该 MCP 页面的重新授权结果及有效期验证。",
+    "example": "请用 feishu-mcp-reauth-public 为 [我的 MCP 链接] 重新授权，并验证失效日期更新。",
+    "limits": "发布包不含登录态；账号登录和授权必须使用你自己的权限。",
+    "evidence": {
+      "README.md": "992abdf274e91d06018a64fc4446f5abd73686391f81f957192c6965bf737d44",
+      "feishu-mcp-reauth-public/README.md": "5b761eb6c48709b0a332bda82bc86a3661293a9857b7fa1afcfc8dc9ac8e0de9",
+      "feishu-mcp-reauth-public/SKILL.md": "c30e466c8ed6353e07e7753b82fd6b4e253913b9b9208a752114f5a6c27c4c48"
+    }
+  },
+  "manifest": {
+    "purpose": "用一份 Repo 清单统一拉取和更新整套技能与工具仓库。",
+    "when": "新电脑初始化技能工作区，或同步多仓版本时。",
+    "inputs": "已安装的 Repo/Git、目标工作区和仓库访问权限。",
+    "steps": [
+      "在目标目录按清单说明执行 repo init，选择正确清单仓库和分支。",
+      "执行 repo sync 同步声明的项目。",
+      "同步完成后需要安装 Skill 时，再使用 active_skills_install。"
+    ],
+    "outputs": "同步到本机的多仓源码工作区。",
+    "example": "请检查 [工作区] 的 Repo 清单和同步状态，说明如何同步技能源码以及下一步安装方式。",
+    "limits": "清单只负责同步，不负责安装到 Agent；浅克隆可能不含分析所需完整历史。",
+    "evidence": {
+      "README.md": "2e05590ee3812b66fe9b1123803e3a01130c0dc14866b5a5f2f13d0fea6fad60"
+    }
+  },
+  "mcu_sdk_import": {
+    "purpose": "把厂商 MCU SDK 分模块升级到 HMOS 工程，同时保留工程里的 HM 补丁。",
+    "when": "升级 apollo4/apollo5/mhs003s 等 MCU SDK 时。",
+    "inputs": "明确平台、MCU 仓库与目标 sdk 路径、vendor 源目录、新旧版本和导入范围。",
+    "steps": [
+      "显式要求使用 mcu-sdk-import，核对平台、目录结构和版本闸门。",
+      "先生成分模块批次及变更说明，识别 SDK_CHANGE_FOR_HMOS/HMI_* 补丁。",
+      "逐批确认后覆盖、恢复需保留的补丁并提交；最后整理验证报告。"
+    ],
+    "outputs": "分模块提交、补丁保留检查和按模板填写的导入验证报告。",
+    "example": "请按 mcu-sdk-import 比较 [vendor目录] 与 [目标sdk目录]，平台为 [名称]，先给版本闸门结论和分批计划，不修改文件。",
+    "limits": "需显式调用；不允许 SDK 降级或整包一次覆盖；平台和目标路径必须由用户指定。",
+    "evidence": {
+      "README.md": "c0736e1777be8e331a7860de6b0c1213f2f4ae2de5544f9d097f173eb2ffb6e6",
+      "SKILL.md": "14e36ed8462015bb9ea3c6f61766a65cfcbe7752d3fc9c32a30af9b2875510da"
+    }
+  },
+  "pl-jira-task-import": {
+    "purpose": "把飞书表格里的项目任务分层创建为 Jira，并把真实编号填回原表。",
+    "when": "PL 已整理好 Epic、适配任务和子任务，需要批量建单时。",
+    "inputs": "飞书任务表、Jira 项目、负责人、版本、筛选范围及两边访问权限。",
+    "steps": [
+      "先检查模板字段、筛选、公式和已有编号，生成导入预览。",
+      "明确要求实际建单后，按 Epic、适配任务、子任务逐层创建。",
+      "每层回填编号后重新读取下一层；最后核对数量、负责人、日期和层级。"
+    ],
+    "outputs": "实际 Jira 任务、原表回填编号及成功/失败清单；预览模式只生成计划。",
+    "example": "请用 pl-jira-task-import 检查 [飞书表格] 中 [项目] 的选定任务，只生成导入预览，列出字段和负责人问题。",
+    "limits": "实际导入会写 Jira 和飞书；重复执行前先核查真实编号，不能用旧快照连续导入三层。",
+    "evidence": {
+      "README.md": "72ae7855ad3da47844e2215802d3326b612bc9d7d63efae51327ee2aa3f0c127",
+      "SKILL.md": "d240fa243c0433879268507f70be866c5a5fd68505fb12f1ffd7098397d1ccd2"
+    }
+  },
+  "power-consumption-analysis": {
+    "purpose": "结合设备日志分析异常耗电、发热和电压变化，区分可能的功耗原因。",
+    "when": "手表掉电快、充电跳变或拔充电器后电压回落时。",
+    "inputs": "异常时间、充电/佩戴情境、PM:INFO 及重启/传感器日志，尽量保留完整时间段。",
+    "steps": [
+      "提供现象和日志，说明充电器插拔与佩戴时间。",
+      "Agent 对齐 PM:INFO、重启及传感器事件，按判定规则比较证据。",
+      "阅读疑似原因、证据不足处及下一步验证；新案例可用于维护规则。"
+    ],
+    "outputs": "带时间证据的功耗分析及硬件漏电、传感器漏电或电池异常等判断线索。",
+    "example": "请用 power-consumption-analysis 分析 [日志路径] 在 [时间段] 的掉电，结合 [佩戴/充电情况] 给出证据与待验证项。",
+    "limits": "日志只能支持有边界的判断；疑似硬件故障不等于已测得硬件漏电。",
+    "evidence": {
+      "README.md": "f8db193cd05d50a3475343f468b733fffd5dd5e4eee21773d94e4fd2097cb767",
+      "SKILL.md": "f8db193cd05d50a3475343f468b733fffd5dd5e4eee21773d94e4fd2097cb767"
+    }
+  },
+  "project_bringup": {
+    "purpose": "从已有 BASE 产品派生 HMOS 新项目，再按硬件表适配器件和 GPIO。",
+    "when": "新板型/新产品导入，需要复用已有产品工程时。",
+    "inputs": "平台、HMOS 仓库、BASE 和 NEW 原名；硬件/GPIO 飞书表及访问权限。",
+    "steps": [
+      "显式调用 project-bringup，先进行 Phase1 dry-run，确认产品复制及配置挂接计划。",
+      "确认后执行 Phase1；核对产品目录、defconfig 和板型配置，再进入 Phase2。",
+      "读取硬件表、列差异并确认，按实际仓库适配；Phase3 按模板整理报告。"
+    ],
+    "outputs": "新项目工程配置、确认后的硬件适配及 Bringup 报告。",
+    "example": "请按 project-bringup 为 [平台] 从 [BASE] 派生 [NEW]，仓库为 [路径]，先给 Phase1 dry-run 计划，不改文件。",
+    "limits": "默认不提交；硬件表不能替代新项目克隆；不能把未验证项目或能力写成已完成。",
+    "evidence": {
+      "README.md": "9f5cdf7521bf41b781cd0b35703745fa3f758a5b6b3de870d428a5bd9b53e63d",
+      "SKILL.md": "2443010cde7cc6877b4d1de1ec14ce4be79324f072bf40a8d4a4dfe99d750b86"
+    }
+  },
+  "sport-record-parser": {
+    "purpose": "当前仓库是运动记录解析工具的占位，尚未提供实际解析实现。",
+    "when": "确认这个仓库目前能不能解析 detail/summary 时。",
+    "inputs": "若要实际解析，需要先取得真实解析器源码或可用入口及数据格式。",
+    "steps": [
+      "查看项目文件确认当前内容。",
+      "当前已记录的实现是仓库变更飞书通知，不是运动解析。",
+      "补充解析器源码和样例后，再按真实实现编写解析步骤。"
+    ],
+    "outputs": "当前没有可验证的运动数据解析或绘图产物。",
+    "example": "请检查 sport-record-parser 当前是否已有解析器；若仍只有通知工作流，明确列出缺失入口和依赖。",
+    "limits": "登记目标不是已交付功能；不能根据项目名编造解析命令。",
+    "evidence": {
+      "README.md": "44449c9cdac8ce98f56aded26bda4cb30589d8eb145c85db7454f522af5d06c4"
+    }
+  },
+  "ui-screen-generator-skill": {
+    "purpose": "把设计图转成符合 Cologne 工程结构的 Storyboard 页面及配套代码。",
+    "when": "需要新增整页 UI，并同步生成 GAPP、style 与 screen.c 时。",
+    "inputs": "设计图/视觉说明、目标 UI 模块和项目、源码仓库及页面交互要求。",
+    "steps": [
+      "显式指定 ui-screen-generator 和目标页面，先解析 ui/<module>/config.json 的项目资源。",
+      "让 Agent 输出页面区域拆分、组件选择和资源计划，并参考同类页面。",
+      "生成相互一致的页面资源及代码，再进行原型验证。"
+    ],
+    "outputs": "GAPP、CNTRLayout style、screen.c，以及资源/组件选型与验证说明。",
+    "example": "请用 ui-screen-generator 根据 [设计图] 为 [模块/项目] 新增 [页面]，先解析配置并给区域、组件和资源计划。",
+    "limits": "适合新增整页；小改现有页面或单个组件 API 问题不适用。",
+    "evidence": {
+      "README.md": "d54c711ca3ec99162bd283dfc4c89514c9b82e6e6ac43ab095d313242d42151d",
+      "SKILL.md": "2dfc93f538619f0746191a55d9ba0cc29f761efd186b873b22a7ac26057efadb"
+    }
+  },
+  "wsl-serial-monitor": {
+    "purpose": "在 VS Code 中连接 COM 串口看日志，并让 Agent 只读查询落盘日志。",
+    "when": "实时观察设备输出、过滤关键词，或分析错误前后日志时。",
+    "inputs": "VS Code 扩展、目标 COM 口和波特率；WSL 模式需要 Windows 互操作。",
+    "steps": [
+      "安装 WSL Serial Monitor，运行 WSL Serial: Open Serial Port 或快捷键 Ctrl+Alt+S。",
+      "在扩展中连接设备并产生结构化日志；用筛选和搜索查看输出。",
+      "Agent 分析时先运行 Serial: Copy Agent CLI Command，提供该命令，按 sessions、search、context 读取证据。"
+    ],
+    "outputs": "实时串口视图、保存的日志，以及带时间和上下文的分析结果。",
+    "example": "请使用扩展提供的 Agent CLI 分析最新会话，搜索 panic/error/watchdog，并读取上下文给出时间与证据。",
+    "limits": "串口由 VS Code 扩展持有；Agent CLI 读落盘日志，不应再次打开 COM。",
+    "evidence": {
+      "README.md": "9d542491eee3d6b002bc07362ae74e276bbc5239d9c668bd0b06cd09997f173c"
+    }
+  },
+  "zepp-magpie-bridge": {
+    "purpose": "组织 Zepp App 与固件模拟器或物理手表的联调和用例验证，形成双端证据报告。",
+    "when": "搭联调环境、验证绑定重连，或执行 App/固件端到端用例时。",
+    "inputs": "目标是 simx86 还是物理手表、本机配置、App/APK；模拟器另需工程路径，测试需用例。",
+    "steps": [
+      "先说明目标类型和任务，运行环境只读检查，确认 App 与固件实例。",
+      "按对应链路建立连接，再执行指定用例；采集 App 与固件两端日志和截图。",
+      "按本轮证据核对业务恢复或用例结果，输出本地/飞书报告及问题跟踪。"
+    ],
+    "outputs": "环境检查、联调操作结果、用例覆盖映射及带双端证据的测试报告。",
+    "example": "请用 zepp-magpie-bridge 检查 [工程路径] 的 simx86 与 Zepp App 联调环境，再验证 [用例]，保留双端日志和截图。",
+    "limits": "窗口、进程或端口存在不代表业务成功；复位、解绑与恢复出厂需明确要求，不能作为普通修复默认执行。",
+    "evidence": {
+      "README.md": "ede81f9173497749cb0c0edabbfce72df3bbe83860d27ee98ff94a1639ae3589",
+      "skills/zepp-magpie-bridge/SKILL.md": "a29d53e813592c9f0997db7b5b83d16a14843116d0e8963daede563132c9677b"
+    }
+  }
+}

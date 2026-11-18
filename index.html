@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>打开 Skills Hub</title><style>body{font:16px "Segoe UI",sans-serif;background:#f6f8f7;color:#23332e;max-width:620px;margin:15vh auto;padding:30px}a{display:inline-block;background:#247453;color:white;padding:14px 24px;border-radius:10px;text-decoration:none}p{line-height:1.8}</style><h1>Skills Hub · 本机工作台</h1><p>正在唤起本机读取脚本，启动后会自动打开工作台。浏览器询问时，请允许打开 Skills Hub。</p><a href="skills-hub://open">打开本机工作台</a><p>工作台已启动时，可直接<a href="http://127.0.0.1:8765/">进入工作台</a>。如果自动唤起没有反应，请点击上方“打开本机工作台”。</p><p>首次使用需在 WSL 项目目录执行一次 <code>python3 launch.py install</code>，每台电脑都需完成这一步。之后直接打开此网页即可。</p><script>
+const localUrl = 'http://127.0.0.1:8765/';
+let timer;
+let attempt = 0;
+async function finishLaunch() {
+  try {
+    await fetch(localUrl, {mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(1500)});
+  } catch {
+    if (++attempt < 30) timer = setTimeout(finishLaunch, 1000);
+    return;
+  }
+  window.close();
+  // Browsers can refuse to close tabs opened directly by the user.
+  setTimeout(() => location.replace(localUrl), 300);
+}
+function waitForLaunch() {
+  clearTimeout(timer);
+  attempt = 0;
+  timer = setTimeout(finishLaunch, 1500);
+}
+document.querySelector('a[href="skills-hub://open"]').addEventListener('click', waitForLaunch);
+location.href = 'skills-hub://open';
+waitForLaunch();
+</script></html>
